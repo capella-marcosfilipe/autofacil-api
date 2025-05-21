@@ -1,4 +1,7 @@
 package br.com.autofacil.api.repositories;
 
-public interface UserRepo {
+import br.com.autofacil.api.models.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepo extends JpaRepository<User, Long> {
 }
