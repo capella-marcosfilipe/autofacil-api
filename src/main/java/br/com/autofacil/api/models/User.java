@@ -1,6 +1,5 @@
 package br.com.autofacil.api.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -15,6 +14,8 @@ public class User {
     private Long id;
 
     private String name;
+
+    @Column(unique = true,  nullable = false)
     private String email;
 
     @Column(name = "password")
@@ -24,7 +25,9 @@ public class User {
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
-    private String role;
+
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -38,12 +41,28 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "vehicle_id")
     )
-    private List<Vehicle> favoriteVehicles;
+    private List<Vehicle> favorites;
 
     @OneToMany(mappedBy = "vendor")
-    private List<VendorSale> sales;
+    private List<VendorSale> vehicles;
 
     // Getters and Setters
+
+    public List<VendorSale> getVehicles() {
+        return vehicles;
+    }
+
+    public void setVehicles(List<VendorSale> vehicles) {
+        this.vehicles = vehicles;
+    }
+
+    public List<Vehicle> getFavorites() {
+        return favorites;
+    }
+
+    public void setFavorites(List<Vehicle> favorites) {
+        this.favorites = favorites;
+    }
 
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
@@ -101,11 +120,11 @@ public class User {
         this.cpf = cpf;
     }
 
-    public String getRole() {
+    public UserRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(UserRole role) {
         this.role = role;
     }
 
@@ -123,21 +142,5 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public List<Vehicle> getFavoriteVehicles() {
-        return favoriteVehicles;
-    }
-
-    public void setFavoriteVehicles(List<Vehicle> favoriteVehicles) {
-        this.favoriteVehicles = favoriteVehicles;
-    }
-
-    public List<VendorSale> getSales() {
-        return sales;
-    }
-
-    public void setSales(List<VendorSale> sales) {
-        this.sales = sales;
     }
 }

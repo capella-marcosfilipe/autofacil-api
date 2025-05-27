@@ -1,45 +1,72 @@
 package br.com.autofacil.api.services;
 
+import br.com.autofacil.api.dtos.user.UserRequestDTO;
+import br.com.autofacil.api.dtos.user.UserResponseDTO;
+import br.com.autofacil.api.dtos.user.UserUpdateDTO;
 import br.com.autofacil.api.models.User;
 import br.com.autofacil.api.repositories.UserRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserService {
-    @Autowired private UserRepo userRepo;
+    private final UserRepo userRepo;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public List<User> getAllUsers() {
-        return userRepo.findAll();
+    public UserService(UserRepo userRepo) {
+        this.userRepo = userRepo;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    public Optional<User> getUserById(Long id){
-        return userRepo.findById(id);
+    public UserResponseDTO createUser(UserRequestDTO dto) {
+        User user = new User();
+        user.setName(dto.name());
+        user.setEmail(dto.email());
+        user.setPasswordHash(passwordEncoder.encode(dto.password()));
+        user.setRole(dto.role());
+
+        userRepo.save(user);
+        return new UserResponseDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
     }
 
-    public Optional<User> getUserByEmail(String email){
+    public List<UserResponseDTO> findAll() {
+        return userRepo.findAll().stream()
+                .map(u -> new UserResponseDTO(u.getId(), u.getName(), u.getEmail(), u.getRole()))
+                .toList();
+    }
+
+    public UserResponseDTO findById(Long id) {
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+
+        return new UserResponseDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
+    }
+
+    public Optional<User> findByEmail(String email){
         return userRepo.findByEmail(email);
     }
 
-    public Optional<User> getUserByUsername(String username){
+    public Optional<User> findByUsername(String username){
         return userRepo.findByUsername(username);
     }
 
-    public User createUser(User user) {
-        user.setCreatedAt(java.time.LocalDateTime.now());
-        user.setUpdatedAt(java.time.LocalDateTime.now());
-        return userRepo.save(user);
+    public UserResponseDTO updateUser(Long id, UserUpdateDTO dto) {
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+
+        user.setName(dto.name());
+        user.setEmail(dto.email());
+        userRepo.save(user);
+
+        return new UserResponseDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
     }
 
-    public User updateUser(User user) {
-        user.setUpdatedAt(java.time.LocalDateTime.now());
-        return userRepo.save(user);
-    }
-
-    public void deleteUser(Long id){
+    public void deleteUser(Long id) {
         userRepo.deleteById(id);
     }
 }
