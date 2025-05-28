@@ -1,54 +1,37 @@
 package br.com.autofacil.api.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
 @Table(name = "vehicles")
 public class Vehicle {
-    @Setter
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String model;
+    private String brand;
+    private int year;
+    private String color;
+    private BigDecimal price;
+    private boolean sold;
+
     @Column(name = "vehicle_type")
     private String vehicleType;
 
-    private String model;
-    private String brand;
-    private String color;
-    private Float price;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vendor_id")
+    @JsonBackReference
+    private User vendor;
 
-    @Column(name = "fuel_type")
-    private String fuelType;
-
-    @Column(name = "transmission_type")
-    private String transmissionType;
-
+    @ElementCollection
+    @CollectionTable(name = "vehicle_photos", joinColumns = @JoinColumn(name = "vehicle_id"))
     @Column(name = "photo_url")
-    private String photoUrl;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "vehicle")
-    private List<VendorSale> vendorSales;
-
-    public List<VendorSale> getVendorSales() {
-        return vendorSales;
-    }
-
-    public void setVendorSales(List<VendorSale> vendorSales) {
-        this.vendorSales = vendorSales;
-    }
+    private List<String> photoUrls;
 
     public Long getId() {
         return id;
@@ -56,14 +39,6 @@ public class Vehicle {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getVehicleType() {
-        return vehicleType;
-    }
-
-    public void setVehicleType(String vehicleType) {
-        this.vehicleType = vehicleType;
     }
 
     public String getModel() {
@@ -82,6 +57,14 @@ public class Vehicle {
         this.brand = brand;
     }
 
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
     public String getColor() {
         return color;
     }
@@ -90,51 +73,43 @@ public class Vehicle {
         this.color = color;
     }
 
-    public Float getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    public String getFuelType() {
-        return fuelType;
+    public boolean isSold() {
+        return sold;
     }
 
-    public void setFuelType(String fuelType) {
-        this.fuelType = fuelType;
+    public void setSold(boolean sold) {
+        this.sold = sold;
     }
 
-    public String getTransmissionType() {
-        return transmissionType;
+    public String getVehicleType() {
+        return vehicleType;
     }
 
-    public void setTransmissionType(String transmissionType) {
-        this.transmissionType = transmissionType;
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
     }
 
-    public String getPhotoUrl() {
-        return photoUrl;
+    public User getVendor() {
+        return vendor;
     }
 
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
+    public void setVendor(User vendor) {
+        this.vendor = vendor;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public List<String> getPhotoUrls() {
+        return photoUrls;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setPhotoUrls(List<String> photoUrls) {
+        this.photoUrls = photoUrls;
     }
 }
