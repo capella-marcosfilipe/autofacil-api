@@ -1,6 +1,7 @@
 package br.com.autofacil.api.models;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +9,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,87 +44,8 @@ public class User {
     private List<Vehicle> favorites;
 
     @OneToMany(mappedBy = "vendor")
-    private List<VendorSale> vehicles;
+    private List<VendorSale> vehiclesAsVendor;
 
-    // Getters and Setters
-
-    public List<VendorSale> getVehicles() {
-        return vehicles;
-    }
-
-    public void setVehicles(List<VendorSale> vehicles) {
-        this.vehicles = vehicles;
-    }
-
-    public List<Vehicle> getFavorites() {
-        return favorites;
-    }
-
-    public void setFavorites(List<Vehicle> favorites) {
-        this.favorites = favorites;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public String getPhonenumber() {
-        return phonenumber;
-    }
-
-    public void setPhonenumber(String phonenumber) {
-        this.phonenumber = phonenumber;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
-    public UserRole getRole() {
-        return role;
-    }
-
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
+    @OneToMany(mappedBy = "buyer")
+    private List<VendorSale> vehiclesAsBuyer;
 }

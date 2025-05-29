@@ -8,7 +8,7 @@ import br.com.autofacil.api.repositories.UserRepo;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // Importado BCryptPasswordEncoder
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +28,9 @@ public class UserService {
         user.setName(dto.name());
         user.setEmail(dto.email());
         user.setPasswordHash(passwordEncoder.encode(dto.password()));
+        user.setPhonenumber(dto.phonenumber());
+        user.setCpf(dto.cpf());
+        user.setDateOfBirth(dto.dateOfBirth());
         user.setRole(dto.role());
 
         userRepo.save(user);
@@ -61,6 +64,8 @@ public class UserService {
 
         user.setName(dto.name());
         user.setEmail(dto.email());
+        user.setPhonenumber(dto.phonenumber());
+        user.setCpf(dto.cpf());
         userRepo.save(user);
 
         return new UserResponseDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
