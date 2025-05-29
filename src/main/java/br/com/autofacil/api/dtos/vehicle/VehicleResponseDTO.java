@@ -1,18 +1,37 @@
 package br.com.autofacil.api.dtos.vehicle;
 
+import br.com.autofacil.api.models.User;
+import br.com.autofacil.api.models.Vehicle;
+
 import java.math.BigDecimal;
 import java.util.List;
 
-public class VehicleResponseDTO {
-    private Long id;
-    private String brand;
-    private String model;
-    private int year;
-    private String color;
-    private BigDecimal price;
-    private String vehicleType;
-    private boolean sold;
-    private List<String> photoUrls;
-    private Long vendorId;
-    private String vendorName;
+public record VehicleResponseDTO (
+    Long id,
+    String brand,
+    String model,
+    int year,
+    String color,
+    BigDecimal price,
+    String vehicleType,
+    boolean sold,
+    List<String> photoUrls,
+    Long vendorId,
+    String vendorName
+) {
+    public static VehicleResponseDTO fromEntity(Vehicle vehicle, User user) {
+        return new VehicleResponseDTO(
+                vehicle.getId(),
+                vehicle.getBrand(),
+                vehicle.getModel(),
+                vehicle.getYear(),
+                vehicle.getColor(),
+                vehicle.getPrice(),
+                vehicle.getVehicleType(),
+                vehicle.isSold(),
+                vehicle.getPhotoUrls(),
+                user.getId(),
+                user.getName()
+        );
+    }
 }
