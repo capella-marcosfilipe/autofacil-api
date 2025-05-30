@@ -48,4 +48,10 @@ public class User {
 
     @OneToMany(mappedBy = "buyer")
     private List<VendorSale> vehiclesAsBuyer;
+
+    @OneToMany(mappedBy = "buyer")
+    private List<PurchaseRequest> purchaseRequestsMade;
+
+    @OneToMany(mappedBy = "vendor")
+    private List<PurchaseRequest> purchaseRequestsReceived;
 }

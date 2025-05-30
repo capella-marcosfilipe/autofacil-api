@@ -38,4 +38,7 @@ public class Vehicle {
     @CollectionTable(name = "vehicle_photos", joinColumns = @JoinColumn(name = "vehicle_id"))
     @Column(name = "photo_url")
     private List<String> photoUrls;
+
+    @OneToMany(mappedBy = "vehicle")
+    private List<PurchaseRequest> purchaseRequests;
 }

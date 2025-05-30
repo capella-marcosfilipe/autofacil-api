@@ -1,5 +1,10 @@
 package br.com.autofacil.api.controllers;
 
+/**
+ * Cadê o enpoint de quando o usuário-comprador solicita uma compra?
+ * Deixar cancelar a compra vvvnnnnnnnnnnnnnnv mnvc vvvvvvvcvcvvvv vvvvcvvvcvvcvcvcvccvvcvcvvcvvcvcvcvvcvvvcvcvcvvvvvcvvcvvvccvvcvvvvcvcvvc vcvvvcvcvcvc vcvcvvcvcvcvc vc vvvvcvc vvcvvvcvvcv vcvvcvvcvc vcvc vcvcvvcvvcvc vcvcvcvccvvcvcvvcvccvvcvcvcvcvcvcvvcvcvcvcvcvcvcvcvcvcvvcvvcvcvcvc vc vc vvvvvvcvcvcvcvcvccvvccxvcvvcvvcvcvvcvcvcvcvcvvcvcvvv vc vvvcv vcvc vvcvvcvcvvcvvc vvcvcvcvcvcv vcvvcvcvvc vvvvcvvvvvvcvvvvcvvvcvcvcvcvcvcvvcvcvvvcvcvvcvvcvcvvvvcvcvvvvc vvcvcvcvvcvvv vvvvc vcvcvcvvc vvcvcvcvccvcvvcvvvcvvcvcvcccvvvcvcvcvcvcvcvcvvvvvvcvvvvcvcvcvc vvvvv
+ */
+
 import br.com.autofacil.api.dtos.vendorsale.VendorSaleRequestDTO;
 import br.com.autofacil.api.dtos.vendorsale.VendorSaleResponseDTO;
 import br.com.autofacil.api.models.User;
