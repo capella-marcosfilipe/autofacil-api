@@ -5,12 +5,10 @@ import br.com.autofacil.api.dtos.vendorsale.VendorSaleResponseDTO;
 import br.com.autofacil.api.models.User;
 import br.com.autofacil.api.models.UserRole;
 import br.com.autofacil.api.services.AuthenticationService;
-import br.com.autofacil.api.services.UserService;
 import br.com.autofacil.api.services.VendorSaleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

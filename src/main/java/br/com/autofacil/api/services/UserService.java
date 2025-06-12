@@ -54,10 +54,6 @@ public class UserService {
         return userRepo.findByEmail(email);
     }
 
-    public Optional<User> findByUsername(String username){
-        return userRepo.findByUsername(username);
-    }
-
     public UserResponseDTO updateUser(Long id, UserUpdateDTO dto) {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));

@@ -1,5 +1,3 @@
-// Arquivo: src/main/java/br/com/autofacil/api/config/SecurityConfig.java
-
 package br.com.autofacil.api.config;
 
 import org.springframework.context.annotation.Bean;

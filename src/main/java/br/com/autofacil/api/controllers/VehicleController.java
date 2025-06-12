@@ -7,7 +7,6 @@ import br.com.autofacil.api.models.User;
 import br.com.autofacil.api.models.UserRole;
 import br.com.autofacil.api.models.Vehicle;
 import br.com.autofacil.api.services.AuthenticationService;
-import br.com.autofacil.api.services.UserService;
 import br.com.autofacil.api.services.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
