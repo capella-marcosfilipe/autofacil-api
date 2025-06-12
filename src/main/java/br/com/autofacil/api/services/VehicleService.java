@@ -1,5 +1,6 @@
 package br.com.autofacil.api.services;
 
+import br.com.autofacil.api.dtos.vehicle.VehicleCreationRequestDTO;
 import br.com.autofacil.api.dtos.vehicle.VehicleRequestDTO;
 import br.com.autofacil.api.dtos.vehicle.VehicleResponseDTO;
 import br.com.autofacil.api.models.User;
@@ -24,7 +25,7 @@ public class VehicleService {
     @Autowired private VehicleRepo vehicleRepo;
 
     // Create
-    public VehicleResponseDTO registerVehicle(VehicleRequestDTO dto, User vendor) {
+    public VehicleResponseDTO registerVehicle(VehicleCreationRequestDTO dto, User vendor) {
         Vehicle vehicle = new Vehicle();
         vehicle.setBrand(dto.brand());
         vehicle.setModel(dto.model());

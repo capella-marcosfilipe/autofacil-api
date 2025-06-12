@@ -1,10 +1,15 @@
 package br.com.autofacil.api.controllers;
 
+import br.com.autofacil.api.dtos.vehicle.VehicleCreationRequestDTO;
 import br.com.autofacil.api.dtos.vehicle.VehicleRequestDTO;
 import br.com.autofacil.api.dtos.vehicle.VehicleResponseDTO;
 import br.com.autofacil.api.models.User;
+import br.com.autofacil.api.models.UserRole;
 import br.com.autofacil.api.models.Vehicle;
+import br.com.autofacil.api.services.AuthenticationService;
+import br.com.autofacil.api.services.UserService;
 import br.com.autofacil.api.services.VehicleService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
@@ -16,17 +21,23 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/vehicles")
+@RequiredArgsConstructor
 public class VehicleController {
     private final VehicleService vehicleService;
-
-    public VehicleController(VehicleService vehicleService) {
-        this.vehicleService = vehicleService;
-    }
+    private final AuthenticationService authService;
 
     // CREATE
     @PostMapping
-    public ResponseEntity<VehicleResponseDTO> create(@RequestBody VehicleRequestDTO dto, @RequestAttribute User vendor) {
-        VehicleResponseDTO created = vehicleService.registerVehicle(dto, vendor);
+    public ResponseEntity<VehicleResponseDTO> create(@RequestBody VehicleCreationRequestDTO dto) {
+        // Check if user is VENDOR
+        User authenticatedVendor = authService.authenticateAndVerifyRole(
+                dto.vendorEmail(),
+                dto.vendorPassword(),
+                UserRole.VENDOR
+        );
+
+        // Call method with authenticatedVendor
+        VehicleResponseDTO created = vehicleService.registerVehicle(dto, authenticatedVendor);
         return  ResponseEntity.ok(created);
     }
 

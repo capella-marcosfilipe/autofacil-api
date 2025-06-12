@@ -3,6 +3,8 @@ package br.com.autofacil.api.controllers;
 import br.com.autofacil.api.dtos.vendorsale.VendorSaleRequestDTO;
 import br.com.autofacil.api.dtos.vendorsale.VendorSaleResponseDTO;
 import br.com.autofacil.api.models.User;
+import br.com.autofacil.api.models.UserRole;
+import br.com.autofacil.api.services.AuthenticationService;
 import br.com.autofacil.api.services.UserService;
 import br.com.autofacil.api.services.VendorSaleService;
 import lombok.RequiredArgsConstructor;
@@ -19,28 +21,7 @@ import java.util.List;
 public class VendorSaleController {
 
     private final VendorSaleService vendorSaleService;
-    private final UserService userService;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    /**
-     * Sistema simples de autenticação de usuário apenas para o projeto da faculdade.
-     *
-     * Autentica o usuário vendedor com base no email e senha fornecidos.
-     *
-     * @param email O email do vendedor.
-     * @param password A senha do vendedor.
-     * @return O objeto User autenticado.
-     * @throws SecurityException Se o email ou senha estiverem incorretos.
-     */
-    private User authenticateVendor(String email, String password) {
-        User vendor = userService.findByEmail(email)
-                .orElseThrow(() -> new SecurityException("Email ou senha incorretos."));
-
-        if (!passwordEncoder.matches(password, vendor.getPasswordHash())) {
-            throw new SecurityException("Email ou senha incorretos.");
-        }
-        return vendor;
-    }
+    private final AuthenticationService authService;
 
     /**
      * Registra uma nova venda de veículo.
@@ -53,7 +34,11 @@ public class VendorSaleController {
     public ResponseEntity<VendorSaleResponseDTO> registerSale(
             @RequestBody VendorSaleRequestDTO dto) {
         // Autentica o vendedor primeiro
-        User authenticatedVendor = authenticateVendor(dto.vendorEmail(), dto.vendorPassword());
+        User authenticatedVendor = authService.authenticateAndVerifyRole(
+                dto.vendorEmail(),
+                dto.vendorPassword(),
+                UserRole.VENDOR
+        );
 
         VendorSaleResponseDTO response = vendorSaleService.registerSale(dto, authenticatedVendor);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -95,7 +80,11 @@ public class VendorSaleController {
             @PathVariable Long id,
             @RequestBody VendorSaleRequestDTO dto) {
         // Autentica o vendedor primeiro
-        User authenticatedVendor = authenticateVendor(dto.vendorEmail(), dto.vendorPassword());
+        User authenticatedVendor = authService.authenticateAndVerifyRole(
+                dto.vendorEmail(),
+                dto.vendorPassword(),
+                UserRole.VENDOR
+        );
 
         VendorSaleResponseDTO updatedSale = vendorSaleService.updateSale(id, dto, authenticatedVendor);
         return ResponseEntity.ok(updatedSale);

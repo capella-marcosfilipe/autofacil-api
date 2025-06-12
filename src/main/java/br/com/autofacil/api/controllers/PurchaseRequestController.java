@@ -2,13 +2,14 @@ package br.com.autofacil.api.controllers;
 
 import br.com.autofacil.api.dtos.purchaserequest.PurchaseRequestRequestDTO;
 import br.com.autofacil.api.dtos.purchaserequest.PurchaseRequestResponseDTO;
+import br.com.autofacil.api.dtos.CredentialsDTO;
 import br.com.autofacil.api.models.User;
+import br.com.autofacil.api.models.UserRole;
+import br.com.autofacil.api.services.AuthenticationService;
 import br.com.autofacil.api.services.PurchaseRequestService;
-import br.com.autofacil.api.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,27 +29,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class PurchaseRequestController {
 
     private final PurchaseRequestService purchaseRequestService;
-    private final UserService userService;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    /**
-     * Autentica um usuário com base no email e senha fornecidos.
-     * Mesmo usado em VendorSaleController
-     *
-     * @param email O email do usuário.
-     * @param password A senha do usuário.
-     * @return O objeto User autenticado.
-     * @throws SecurityException Se o email ou senha estiverem incorretos.
-     */
-    private User authenticateUser(String email, String password) {
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new SecurityException("Email ou senha incorretos."));
-
-        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
-            throw new SecurityException("Email ou senha incorretos.");
-        }
-        return user;
-    }
+    private final AuthenticationService authService;
 
     @Operation(
             summary = "Criar uma nova solicitação de compra",
@@ -72,7 +53,11 @@ public class PurchaseRequestController {
                     content = @Content(schema = @Schema(implementation = PurchaseRequestRequestDTO.class))
             ) PurchaseRequestRequestDTO dto) {
         // Autentica o comprador
-        User authenticatedBuyer = authenticateUser(dto.buyerEmail(), dto.buyerPassword());
+        User authenticatedBuyer = authService.authenticateAndVerifyRole(
+                dto.buyerEmail(),
+                dto.buyerPassword(),
+                UserRole.BUYER
+        );
 
         PurchaseRequestResponseDTO response = purchaseRequestService.createPurchaseRequest(dto.vehicleId(), authenticatedBuyer);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -97,44 +82,41 @@ public class PurchaseRequestController {
     }
 
     @Operation(
-            summary = "Listar solicitações de compra feitas por um comprador",
-            description = "Retorna todas as solicitações de compra que um usuário BUYER fez.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Lista de solicitações retornada com sucesso",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PurchaseRequestResponseDTO.class))),
-                    @ApiResponse(responseCode = "401", description = "Não autorizado (credenciais inválidas)",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class)))
-            }
+            summary = "Listar solicitações de compra feitas por um comprador (via POST)",
+            description = "Retorna todas as solicitações de compra que um usuário BUYER fez. As credenciais são enviadas no corpo da requisição por segurança."
     )
-    @GetMapping("/by-buyer")
+    @PostMapping("/query/by-buyer")
     public ResponseEntity<List<PurchaseRequestResponseDTO>> getPurchaseRequestsByBuyer(
-            @Parameter(description = "Email do comprador para autenticação", example = "comprador@example.com")
-            @RequestParam String buyerEmail,
-            @Parameter(description = "Senha do comprador para autenticação", example = "senhaDoComprador")
-            @RequestParam String buyerPassword) {
-        User authenticatedBuyer = authenticateUser(buyerEmail, buyerPassword);
+            @RequestBody CredentialsDTO dto) {
+        // Autenticar usuário BUYER
+        User authenticatedBuyer = authService.authenticateAndVerifyRole(
+                dto.email(),
+                dto.password(),
+                UserRole.BUYER
+        );
+
         List<PurchaseRequestResponseDTO> requests = purchaseRequestService.getPurchaseRequestsByBuyer(authenticatedBuyer.getId());
+
         return ResponseEntity.ok(requests);
     }
 
     @Operation(
-            summary = "Listar solicitações de compra recebidas por um vendedor",
-            description = "Retorna todas as solicitações de compra que um usuário VENDOR recebeu para seus anúncios.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Lista de solicitações retornada com sucesso",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PurchaseRequestResponseDTO.class))),
-                    @ApiResponse(responseCode = "401", description = "Não autorizado (credenciais inválidas)",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class)))
-            }
+            summary = "Listar solicitações de compra recebidas por um vendedor (via POST)",
+            description = "Retorna todas as solicitações de compra que um usuário VENDOR recebeu. As credenciais são enviadas no corpo da requisição por segurança."
     )
-    @GetMapping("/by-vendor")
+    @PostMapping("/query/by-vendor")
     public ResponseEntity<List<PurchaseRequestResponseDTO>> getPurchaseRequestsByVendor(
-            @Parameter(description = "Email do vendedor para autenticação", example = "vendedor@example.com")
-            @RequestParam String vendorEmail,
-            @Parameter(description = "Senha do vendedor para autenticação", example = "senhaDoVendedor")
-            @RequestParam String vendorPassword) {
-        User authenticatedVendor = authenticateUser(vendorEmail, vendorPassword);
+            @RequestBody CredentialsDTO dto) {
+
+        // Autentica usuário VENDOR
+        User authenticatedVendor = authService.authenticateAndVerifyRole(
+                dto.email(),
+                dto.password(),
+                UserRole.VENDOR
+        );
+
         List<PurchaseRequestResponseDTO> requests = purchaseRequestService.getPurchaseRequestsByVendor(authenticatedVendor.getId());
+
         return ResponseEntity.ok(requests);
     }
 
@@ -153,16 +135,12 @@ public class PurchaseRequestController {
             }
     )
     @PutMapping("/{id}/accept")
-    public ResponseEntity<PurchaseRequestResponseDTO> acceptPurchaseRequest(
-            @Parameter(description = "ID da solicitação de compra a ser aceita", example = "1")
-            @PathVariable Long id,
-            @RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Credenciais do vendedor para autenticação",
-                    required = true,
-                    content = @Content(schema = @Schema(implementation = Map.class, example = "{\"vendorEmail\": \"vendedor@example.com\", \"vendorPassword\": \"senhaDoVendedor\"}")) // Exemplo para credenciais
-            ) Map<String, String> credentials) {
-        // Autentica o vendedor
-        User authenticatedVendor = authenticateUser(credentials.get("vendorEmail"), credentials.get("vendorPassword"));
+    public ResponseEntity<PurchaseRequestResponseDTO> acceptPurchaseRequest(@PathVariable Long id, @RequestBody Map<String, String> credentials) {
+        User authenticatedVendor = authService.authenticateAndVerifyRole(
+                credentials.get("vendorEmail"),
+                credentials.get("vendorPassword"),
+                UserRole.VENDOR
+        );
 
         PurchaseRequestResponseDTO response = purchaseRequestService.acceptPurchaseRequest(id, authenticatedVendor);
         return ResponseEntity.ok(response);
@@ -192,7 +170,11 @@ public class PurchaseRequestController {
                     content = @Content(schema = @Schema(implementation = Map.class, example = "{\"vendorEmail\": \"vendedor@example.com\", \"vendorPassword\": \"senhaDoVendedor\"}"))
             ) Map<String, String> credentials) {
         // Autentica o vendedor
-        User authenticatedVendor = authenticateUser(credentials.get("vendorEmail"), credentials.get("vendorPassword"));
+        User authenticatedVendor = authService.authenticateAndVerifyRole(
+                credentials.get("vendorEmail"),
+                credentials.get("vendorPassword"),
+                UserRole.VENDOR
+        );
 
         PurchaseRequestResponseDTO response = purchaseRequestService.denyPurchaseRequest(id, authenticatedVendor);
         return ResponseEntity.ok(response);
