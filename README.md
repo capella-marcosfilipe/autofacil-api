@@ -22,10 +22,10 @@ Operações que criam ou modificam dados (`POST`, `PUT`, `PATCH`, `DELETE`) e qu
 
 A API é organizada em torno dos seguintes recursos principais:
 
-1.  [**Usuários (`/users`)**](https://www.google.com/search?q=%231-recurso-usurios)
-2.  [**Veículos (`/vehicles`)**](https://www.google.com/search?q=%232-recurso-veculos)
-3.  [**Vendas (`/sales`)**](https://www.google.com/search?q=%233-recurso-vendas)
-4.  [**Solicitações de Compra (`/purchase-requests`)**](https://www.google.com/search?q=%234-recurso-solicitaes-de-compra)
+1.  [**Usuários (`/users`)**](#1-recurso-usurários)
+2.  [**Veículos (`/vehicles`)**](#2-recurso-veículos)
+3.  [**Vendas (`/sales`)**](#3-recurso-vendas)
+4.  [**Solicitações de Compra (`/purchase-requests`)**](#4-recurso-solicitações-de-compra)
 
 -----
 
@@ -422,7 +422,7 @@ Busca e retorna um registro de venda pelo seu ID.
 
 -----
 
-## 4\. Recurso: Solicitações de Compra
+## 4. Recurso: Solicitações de Compra
 
 Endpoints para o gerenciamento de propostas de compra.
 
@@ -441,7 +441,6 @@ Permite que um comprador autenticado crie uma solicitação de compra para um ve
 | `buyerPassword` | String | Senha do comprador para autenticação. | Sim |
 
 **Exemplo de Requisição:**
-
 ```json
 {
   "vehicleId": 1,
@@ -464,31 +463,62 @@ Permite que um comprador autenticado crie uma solicitação de compra para um ve
 }
 ```
 
-### 4.2. Listar Solicitações de Compra por Comprador
+### 4.2. Listar Solicitações por Comprador (Seguro)
 
-Retorna todas as solicitações de compra que um usuário `BUYER` fez.
+Retorna todas as solicitações de compra que um usuário `BUYER` fez. As credenciais são enviadas no corpo da requisição por segurança.
 
-`GET /purchase-requests/by-buyer`
+`POST /purchase-requests/query/by-buyer`
 
-**Parâmetros de Consulta (Query)**
+**Corpo da Requisição (`application/json`)**
 
 | Parâmetro | Tipo | Descrição | Obrigatório |
 | :--- | :--- | :--- | :--- |
-| `buyerEmail` | String | Email do comprador para autenticação. | Sim |
-| `buyerPassword` | String | Senha do comprador para autenticação. | Sim |
+| `email` | String | Email do comprador para autenticação. | Sim |
+| `password`| String | Senha do comprador para autenticação. | Sim |
+
+**Exemplo de Requisição:**
+```json
+{
+  "email": "comprador@example.com",
+  "password": "senhaDoComprador"
+}
+```
 
 **Resposta de Sucesso (200 OK)**
-
 * Retorna um array de objetos de Solicitação de Compra.
 
-### 4.3. Aceitar Solicitação de Compra
+### 4.3. Listar Solicitações por Vendedor (Seguro)
+
+Retorna todas as solicitações de compra que um usuário `VENDOR` recebeu. As credenciais são enviadas no corpo da requisição por segurança.
+
+`POST /purchase-requests/query/by-vendor`
+
+**Corpo da Requisição (`application/json`)**
+
+| Parâmetro | Tipo | Descrição | Obrigatório |
+| :--- | :--- | :--- | :--- |
+| `email` | String | Email do vendedor para autenticação. | Sim |
+| `password`| String | Senha do vendedor para autenticação. | Sim |
+
+**Exemplo de Requisição:**
+```json
+{
+  "email": "vendedor@example.com",
+  "password": "senhaDoVendedor"
+}
+```
+
+**Resposta de Sucesso (200 OK)**
+* Retorna um array de objetos de Solicitação de Compra.
+
+
+### 4.4. Aceitar Solicitação de Compra
 
 Permite que um usuário `VENDOR` aceite uma solicitação de compra pendente.
 
 `PUT /purchase-requests/{id}/accept`
 
 **Corpo da Requisição (`application/json`)**
-
 ```json
 {
   "vendorEmail": "vendedor@example.com",
@@ -497,17 +527,15 @@ Permite que um usuário `VENDOR` aceite uma solicitação de compra pendente.
 ```
 
 **Resposta de Sucesso (200 OK)**
-
 * Retorna o objeto da Solicitação de Compra atualizado com status `ACCEPTED`.
 
-### 4.4. Negar Solicitação de Compra
+### 4.5. Negar Solicitação de Compra
 
 Permite que um usuário `VENDOR` negue uma solicitação de compra pendente.
 
 `PUT /purchase-requests/{id}/deny`
 
 **Corpo da Requisição (`application/json`)**
-
 ```json
 {
   "vendorEmail": "vendedor@example.com",
@@ -516,5 +544,4 @@ Permite que um usuário `VENDOR` negue uma solicitação de compra pendente.
 ```
 
 **Resposta de Sucesso (200 OK)**
-
 * Retorna o objeto da Solicitação de Compra atualizado com status `DENIED`.
